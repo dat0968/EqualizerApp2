@@ -1,0 +1,136 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayoutBands"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- dropdown preset -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Preset"
+        android:textSize="20sp"
+        android:textColor="#074709"
+        />
+    <Spinner
+        android:id="@+id/spinnerPreset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dropdown">
+
+    </Spinner>
+    <!-- Band 1 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:id="@+id/txtBand1"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="60 Hz"
+            android:textSize="14sp"
+            android:gravity="center_vertical" />
+
+        <SeekBar
+            android:id="@+id/seekBarBand1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Band 2 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txtBand2"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="230 Hz"
+            android:textSize="14sp"
+            android:gravity="center_vertical" />
+
+        <SeekBar
+            android:id="@+id/seekBarBand2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Band 3 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txtBand3"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="910 Hz"
+            android:textSize="14sp"
+            android:gravity="center_vertical" />
+
+        <SeekBar
+            android:id="@+id/seekBarBand3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Band 4 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txtBand4"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="3600 Hz"
+            android:textSize="14sp"
+            android:gravity="center_vertical" />
+
+        <SeekBar
+            android:id="@+id/seekBarBand4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Band 5 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/txtBand5"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="14000 Hz"
+            android:textSize="14sp"
+            android:gravity="center_vertical" />
+
+        <SeekBar
+            android:id="@+id/seekBarBand5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCreate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="THÊM MỚI" />
+
+</LinearLayout>
