@@ -133,4 +133,78 @@
         android:layout_gravity="center"
         android:text="SAVE" />
 
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="XÓA" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bassboost"
+        android:textSize="20sp"
+        android:textColor="#074709"
+        />
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1"
+        android:padding="20dp">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/txtBassBoost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bassboost"
+                android:textSize="20sp"
+                android:textColor="#074709" />
+
+            <SeekBar
+                android:id="@+id/seekBarBass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:progress="500" />
+        </TableRow>
+
+    </TableLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Booster"
+        android:textSize="20sp"
+        android:textColor="#074709"
+        />
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1"
+        android:padding="20dp">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/txtBooster"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Booster"
+                android:textSize="20sp"
+                android:textColor="#074709" />
+
+            <SeekBar
+                android:id="@+id/seekBarBooster"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:progress="500" />
+        </TableRow>
+
+    </TableLayout>
 </LinearLayout>

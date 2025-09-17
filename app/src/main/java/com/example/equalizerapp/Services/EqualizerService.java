@@ -3,19 +3,27 @@ package com.example.equalizerapp.Services;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.audiofx.BassBoost;
 import android.media.audiofx.Equalizer;
+import android.media.audiofx.LoudnessEnhancer;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
+import com.example.equalizerapp.MainActivity;
+import com.example.equalizerapp.R;
+
 public class EqualizerService extends Service {
     private Equalizer equalizer;
+    private BassBoost bassBoost;
+    private LoudnessEnhancer loudnessEnhancer;
     private static final String TAG = "EqualizerService";
     SharedPreferences prefs;
     private static final String CHANNEL_ID = "EqualizerServiceChannel";
@@ -25,6 +33,10 @@ public class EqualizerService extends Service {
     public static final String EXTRA_PRESET_POS = "preset_position";
     public static final String EXTRA_BAND = "band";
     public static final String EXTRA_LEVEL = "level";
+    public static final String ACTION_SET_BASSBOOST = "ACTION_SET_BASSBOOST";
+    public static final String EXTRA_BASSBOOST_LEVEL = "EXTRA_BASSBOOST_LEVEL";
+    public static final String ACTION_SET_BOOSTER = "ACTION_SET_BOOSTER";
+    public static final String EXTRA_BOOSTER_LEVEL = "EXTRA_BOOSTER_LEVEL";
 
     @Override
     public void onCreate() {
@@ -34,10 +46,33 @@ public class EqualizerService extends Service {
         }
         equalizer = new Equalizer(0, 0);
         equalizer.setEnabled(true);
+
+        bassBoost = new BassBoost(0, 0);
+        bassBoost.setEnabled(true);
+
+        loudnessEnhancer  = new LoudnessEnhancer(0);
+        loudnessEnhancer.setEnabled(true);
     }
 
     @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
+        // Xử lý Booster
+        if (intent != null && ACTION_SET_BOOSTER.equals(intent.getAction())) {
+            int level = intent.getIntExtra(EXTRA_BOOSTER_LEVEL, 0);
+            if (loudnessEnhancer != null) {
+                loudnessEnhancer.setTargetGain(level);
+            }
+        }
+
+        // Xử lý BassBoost
+        if (intent != null && ACTION_SET_BASSBOOST.equals(intent.getAction())) {
+            int level = intent.getIntExtra(EXTRA_BASSBOOST_LEVEL, 0);
+            if (bassBoost != null) {
+                bassBoost.setStrength((short) level);
+            }
+        }
+
+        // Xử lý Equalizer
         if (intent != null && ACTION_SET_BAND.equals(intent.getAction())) {
             prefs = getSharedPreferences("EQ_PREFS", Context.MODE_PRIVATE);
             prefs.edit().putInt("selectedPreset", 0).commit();
@@ -106,6 +141,8 @@ public class EqualizerService extends Service {
         }
         else {
             applySavedEqualizer();
+            applySavedBassBoost();
+            applySavedBooster();
             LoadDataPresent();
             //Gửi ACTION_READY để Activity update UI
             Intent readyIntent = new Intent(ACTION_READY);
@@ -114,7 +151,18 @@ public class EqualizerService extends Service {
         }
         return START_STICKY;
     }
-
+    private  void applySavedBooster(){
+        if(bassBoost == null) return;
+        prefs = getSharedPreferences("EQ_PREFS", Context.MODE_PRIVATE);
+        int savedLevel = prefs.getInt("booster_level", 0);
+        loudnessEnhancer.setTargetGain(savedLevel);
+    }
+    private  void applySavedBassBoost(){
+        if(bassBoost == null) return;
+        prefs = getSharedPreferences("EQ_PREFS", Context.MODE_PRIVATE);
+        int savedLevel = prefs.getInt("bassboost_level", 0);
+        bassBoost.setStrength((short) savedLevel);
+    }
     private void applySavedEqualizer() {
         try {
             if (equalizer == null) return;
@@ -151,17 +199,6 @@ public class EqualizerService extends Service {
         for (short i = 0; i < numberOfSystemPresets; i++) {
             prefs.edit().putString("systemPreset" + i, equalizer.getPresetName(i)).commit();
         }
-
-        // Log để debug
-        for (short i = 0; i < numberOfSystemPresets; i++) {
-            Log.d("systemPreset", "systemPreset" + i + "=" + prefs.getString("systemPreset" + i, ""));
-        }
-
-        // Log user presets
-        int numberOfUserPresets = prefs.getInt("numberOfUserPresets", 0);
-        for (int i = 0; i < numberOfUserPresets; i++) {
-            Log.d("userPreset", "userPreset" + i + "=" + prefs.getString("userPreset" + i, ""));
-        }
     }
 
     private Notification createNotificationChannel() {
@@ -175,10 +212,25 @@ public class EqualizerService extends Service {
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) manager.createNotificationChannel(channel);
         }
+
+        // Intent mở MainActivity
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        // PendingIntent để gắn vào notification
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
         return new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.baseline_surround_sound_24)
                 .setContentTitle("Equalizer Service")
                 .setContentText("Equalizer is applied after boot")
                 .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setContentIntent(pendingIntent)
                 .build();
     }
 
