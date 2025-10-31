@@ -1,15 +1,1 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+# Gradle .gradle/ build/ **/build/ !gradle-wrapper.jar # Local configuration local.properties *.iml .idea/ .idea/caches .idea/libraries .idea/modules.xml .idea/workspace.xml .idea/navEditor.xml .idea/assetWizardSettings.xml .idea/misc.xml # Android Studio captures/ .externalNativeBuild/ .cxx/ *.apk *.ap_ output.json # Signing / keystore files *.keystore *.jks *.pem # Log / debug *.log # OS-specific files .DS_Store Thumbs.db # Generated files gen/ out/ bin/ # Kotlin/Java build *.class *.dex *.jar *.war *.ear *.class # NDK / CMake obj/ *.o *.so # Gradle caches .gradle/ **/build/ .gradle/ !gradle/wrapper/gradle-wrapper.properties # Lint lint/intermediates/ lint/generated/ lint/outputs/ lint/tmp/ # Android Studio captures captures/ # Firebase / Google services google-services.json GoogleService-Info.plist # Fastlane fastlane/report.xml fastlane/Preview.html fastlane/screenshots fastlane/test_output fastlane/readme.md # Misc .idea *.swp *.tmp

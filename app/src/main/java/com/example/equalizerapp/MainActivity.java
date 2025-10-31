@@ -1,5 +1,4 @@
 package com.example.equalizerapp;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -54,38 +53,29 @@ public class MainActivity extends AppCompatActivity {
         Log.d("onCreate", "onCreate: chạy");
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
-
-        // Kiểm tra và yêu cầu quyền nếu cần
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
-                Log.d("step", "step1:step1");
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.POST_NOTIFICATIONS},
                         100);
 
             } else {
-                Log.d("step", "step2:step2");
                 Intent myintent = new Intent(this, EqualizerService.class);
                 ContextCompat.startForegroundService(this, myintent);
             }
         } else {
-            Log.d("step", "step3:step3");
             Intent myintent = new Intent(this, EqualizerService.class);
             ContextCompat.startForegroundService(this, myintent);
         }
-
         btnCreate = findViewById(R.id.btnCreate);
         prefs = getSharedPreferences("EQ_PREFS", MODE_PRIVATE);
         int selectedPreset = prefs.getInt("selectedPreset", 0);
-
         if(selectedPreset != 0){
             btnCreate.setVisibility(View.INVISIBLE);
         }else{
             btnCreate.setVisibility(View.VISIBLE);
         }
-
         btnCreate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,28 +100,22 @@ public class MainActivity extends AppCompatActivity {
                         .show();
             }
         });
-
         spnPreset = findViewById(R.id.spinnerPreset);
         IntentFilter filter = new IntentFilter(EqualizerService.ACTION_READY);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(eqReadyReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
-            Log.d("callRegister", "callRg: yes, this is a RECEIVER_NOT_EXPORTED" );
         } else {
-            Log.d("callRegister", "callRg: yes" );
             registerReceiver(eqReadyReceiver, filter);
         }
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults, int deviceId) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId);
-        if (requestCode == 100) { // Code bạn dùng khi request permission
+        if (requestCode == 100) { // Code dùng khi request permission
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d("Permissions", "Notification permission granted");
                 Intent myintent = new Intent(this, EqualizerService.class);
                 ContextCompat.startForegroundService(this, myintent);
-
-                // Tải lạ i activity để nhận broadcast ngay
                 recreate();
             } else {
                 Log.d("Permissions", "Notification permission denied");
@@ -146,42 +130,29 @@ public class MainActivity extends AppCompatActivity {
         int numberOfSystemPresets = prefs.getInt("numberOfSystemPresets", 0);
         SharedPreferences.Editor editor = prefs.edit();
 
-        Log.d("saveNewPreset", "Before save - User presets: " + numberOfUserPresets + ", System presets: " + numberOfSystemPresets);
-
         // 1. Lưu tên preset mới với key riêng cho user preset
         editor.putString("userPreset" + numberOfUserPresets, presetName);
-
         // 2. Lưu cấu hình hiện tại của các band với key riêng
         for (int band = 0; band < seekBars.length; band++) {
             int level = seekBars[band].getProgress() + minLevel;
             editor.putInt("userPreset" + numberOfUserPresets + "_band" + band, level);
-            Log.d("savePresetBand", "userPreset" + numberOfUserPresets + "_band" + band + " = " + level);
         }
-
         // 3. Tăng số lượng user preset
         editor.putInt("numberOfUserPresets", numberOfUserPresets + 1);
-
         // 4. Tính vị trí preset mới: Custom(0) + SystemPresets + UserPresets
         // Vị trí = 1 + numberOfSystemPresets + numberOfUserPresets (vị trí hiện tại chưa tăng)
         int newPresetPosition = 1 + numberOfSystemPresets + numberOfUserPresets;
         editor.putInt("selectedPreset", newPresetPosition);
-
         // 5. Apply tất cả thay đổi trước khi cập nhật UI
         editor.commit();
-
-        Log.d("saveNewPreset", "After save - New position: " + newPresetPosition + ", User presets now: " + (numberOfUserPresets + 1));
-
         // 6. Cập nhật UI
         setupPresent();
-
         // 7. Set selection để đảm bảo preset vừa tạo được chọn
         if (newPresetPosition < presetNamesRestored.size()) {
             spnPreset.setSelection(newPresetPosition, false);
             lastPreset = newPresetPosition;
         }
-
         Toast.makeText(this, "Preset \"" + presetName + "\" đã được lưu tại vị trí " + newPresetPosition + "!", Toast.LENGTH_SHORT).show();
-        Log.d("presetNameSave", "userPreset" + numberOfUserPresets + ": " + presetName + " at position " + newPresetPosition);
     }
 
     private final BroadcastReceiver eqReadyReceiver = new BroadcastReceiver() {
@@ -200,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
             }
             setupPresent();
             setupSeekBars();
-            updateSeekBarsUI(); // Cập nhật UI sau khi preset thay đổi
+            updateSeekBarsUI();
         }
     };
 
@@ -211,17 +182,6 @@ public class MainActivity extends AppCompatActivity {
             int savedLevel = prefs.getInt("band" + i, 0);
             seekBars[i].setProgress(savedLevel - minLevel);
             txtBands[i].setText(savedLevel / 100 + " dB");
-            Log.d("updateSeekBarsUI", "Band " + i + " set to " + savedLevel + " (progress: " + (savedLevel - minLevel) + ")");
-        }
-    }
-
-    // Method debug để xem các giá trị preset
-    private void debugPresetValues(String presetName, int presetIndex) {
-        Log.d("debugPreset", "=== " + presetName + " ===");
-        for (int i = 0; i < numberOfBands; i++) {
-            int currentBand = prefs.getInt("band" + i, 0);
-            int userPresetBand = prefs.getInt("userPreset" + presetIndex + "_band" + i, -999);
-            Log.d("debugPreset", "Band " + i + ": current=" + currentBand + ", userPreset=" + userPresetBand);
         }
     }
 
@@ -229,27 +189,20 @@ public class MainActivity extends AppCompatActivity {
         int numberOfSystemPresets = prefs.getInt("numberOfSystemPresets", 0);
         int numberOfUserPresets = prefs.getInt("numberOfUserPresets", 0);
 
-        Log.d("setupPresent", "System presets: " + numberOfSystemPresets + ", User presets: " + numberOfUserPresets);
-
         presetNamesRestored = new ArrayList<>();
-        presetNamesRestored.add("Custom"); // Vị trí 0
+        presetNamesRestored.add("Custom");
 
         // Thêm system presets (vị trí 1 -> numberOfSystemPresets)
         for(int i = 0; i < numberOfSystemPresets; i++){
             String systemPresetName = prefs.getString("systemPreset" + i, "System Preset " + i);
             presetNamesRestored.add(systemPresetName);
-            Log.d("loadSystemPreset", "Position " + (i + 1) + ": " + systemPresetName);
         }
 
         // Thêm user presets (vị trí numberOfSystemPresets + 1 -> end)
         for(int i = 0; i < numberOfUserPresets; i++){
             String userPresetName = prefs.getString("userPreset" + i, "User Preset " + i);
             presetNamesRestored.add(userPresetName);
-            int position = 1 + numberOfSystemPresets + i;
-            Log.d("loadUserPreset", "Position " + position + ": userPreset" + i + " = " + userPresetName);
         }
-
-        Log.d("allPresets", "Total presets: " + presetNamesRestored.size() + " -> " + presetNamesRestored.toString());
 
         // Gắn adapter cho spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -261,11 +214,10 @@ public class MainActivity extends AppCompatActivity {
         spnPreset.setAdapter(adapter);
 
         int savedPreset = prefs.getInt("selectedPreset", 0);
-        Log.d("selectedPreset", "Saved preset position: " + savedPreset + ", Total available: " + presetNamesRestored.size());
 
         // Đảm bảo selectedPreset không vượt quá số lượng preset có sẵn
         if (savedPreset >= presetNamesRestored.size()) {
-            savedPreset = 0; // Reset về Custom nếu vị trí không hợp lệ
+            savedPreset = 0;
             prefs.edit().putInt("selectedPreset", 0).apply();
         }
 
@@ -278,22 +230,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == lastPreset) return;
-                Log.d("spinnerSelected", "Selected position: " + position + ", preset: " + presetNamesRestored.get(position));
-                Log.d("spinnerSelected", "Previous lastPreset: " + lastPreset);
 
                 lastPreset = position;
                 btnCreate.setVisibility(position == 0 ? View.VISIBLE : View.INVISIBLE);
 
-                // Debug: Nếu là user preset, xem giá trị trước khi apply
-                int numberOfSystemPresets = prefs.getInt("numberOfSystemPresets", 0);
-                if (position > numberOfSystemPresets) {
-                    int userPresetIndex = position - numberOfSystemPresets - 1;
-                    debugPresetValues("Before apply userPreset" + userPresetIndex, userPresetIndex);
-                }
-
                 // Lưu vị trí được chọn
                 prefs.edit().putInt("selectedPreset", position).commit();
-                Log.d("spinnerSelected", "Saved selectedPreset: " + position);
 
                 Intent intent = new Intent(MainActivity.this, EqualizerService.class);
                 intent.setAction(EqualizerService.ACTION_USE_PRESET);
@@ -324,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
 
                     // Khi user thay đổi seekbar, chuyển về Custom mode
                     prefs.edit().putInt("selectedPreset", 0).commit();
-                    spnPreset.setSelection(0, false); // Chuyển spinner về Custom
+                    spnPreset.setSelection(0, false);
                     lastPreset = 0;
                     btnCreate.setVisibility(View.VISIBLE);
 
@@ -334,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MainActivity.this, EqualizerService.class);
                     intent.setAction(EqualizerService.ACTION_SET_BAND);
                     intent.putExtra(EqualizerService.EXTRA_BAND, (int) band);
-                    Log.d("level", "level: " + (int)level);
                     intent.putExtra(EqualizerService.EXTRA_LEVEL, (int)level);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         startForegroundService(intent);
@@ -344,16 +285,15 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+                // Kết thúc thao tác kéo
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {
                     // Lưu TOÀN BỘ preset Custom vào band_custom (đầy đủ tất cả band)
                     SharedPreferences.Editor editor = prefs.edit();
                     for (int b = 0; b < numberOfBands; b++) {
                         short fullLevel = (short) (seekBars[b].getProgress() + minLevel);
                         editor.putInt("band_custom" + b, fullLevel);
-                        Log.d("SaveCustomFull", "Saved band_custom" + b + ": " + fullLevel + " (from seekbar progress: " + seekBars[b].getProgress() + ")");
                     }
-                    editor.putInt("selectedPreset", 0).commit(); // Đảm bảo ở Custom
-                    Log.d("SaveCustomFull", "Full Custom preset saved on stop touch");
+                    editor.putInt("selectedPreset", 0).commit();
                 }
             });
         }

@@ -43,12 +43,9 @@ public class EqualizerService extends Service {
             prefs.edit().putInt("selectedPreset", 0).commit();
             int band = intent.getIntExtra(EXTRA_BAND, -1);
             int level = intent.getIntExtra(EXTRA_LEVEL, 0);
+            // cập nhật mức âm lượng -> thay đổi âm thanh bên trong
             equalizer.setBandLevel((short) band, (short)level);
             prefs.edit().putInt("band" + band, level).commit();
-            for(int i = 0; i < 5; i++){
-
-                Log.d("band", "band" + i + ": " + prefs.getInt("band" + i, -9));
-            }
         }
         else if(intent != null && ACTION_USE_PRESET.equals(intent.getAction())){
             int position = intent.getIntExtra(EXTRA_PRESET_POS, 0);
@@ -61,22 +58,16 @@ public class EqualizerService extends Service {
             int numberOfSystemPresets = equalizer.getNumberOfPresets();
             int numberOfUserPresets = prefs.getInt("numberOfUserPresets", 0);
 
-            Log.d("USE_PRESET", "Position: " + position + ", System: " + numberOfSystemPresets + ", User: " + numberOfUserPresets);
-
             if (position == 0) {
                 // Custom: áp dụng các band đang lưu trong SharedPreferences
                 for (short band = 0; band < equalizer.getNumberOfBands(); band++) {
                     int level = prefs.getInt("band_custom" + band, 0);
-                    //int level = prefs.getInt("band_custom" + band, 0);
                     prefs.edit().putInt("band" + band, level).commit();
-                    Log.d("level_band_custom", "level_band_custom" + band + ": " + level);
                     equalizer.setBandLevel(band, (short) level);
                 }
-                Log.d("ApplyPreset", "Custom preset applied");
             } else if (position <= numberOfSystemPresets) {
                 int eqPresetIndex = position - 1;
                 equalizer.usePreset((short) eqPresetIndex);
-                Log.d("ApplyPreset", "System preset " + eqPresetIndex + " applied");
 
                 // Cập nhật UI với giá trị của preset hệ thống
                 short numberOfBands = equalizer.getNumberOfBands();
@@ -88,14 +79,11 @@ public class EqualizerService extends Service {
             } else {
                 // Preset do user tạo
                 int userPresetIndex = position - numberOfSystemPresets - 1;
-                Log.d("ApplyPreset", "User preset " + userPresetIndex + " applied (position " + position + ")");
-
                 for (short band = 0; band < equalizer.getNumberOfBands(); band++) {
                     int level = prefs.getInt("userPreset" + userPresetIndex + "_band" + band, 0);
                     equalizer.setBandLevel(band, (short) level);
                     // Cập nhật band hiện tại để UI hiển thị đúng
                     editor.putInt("band" + band, level);
-                    Log.d("ApplyUserPreset", "Band " + band + " = " + level + " (from userPreset" + userPresetIndex + "_band" + band + ")");
                 }
                 editor.commit();
             }
@@ -126,13 +114,10 @@ public class EqualizerService extends Service {
             short maxLevel = equalizer.getBandLevelRange()[1];
             prefs.edit().putInt("minLevel", minLevel).commit();
             prefs.edit().putInt("maxLevel", maxLevel).commit();
-
             for (short band = 0; band < numberOfBands; band++) {
                 int level = prefs.getInt("band" + band, 0);
                 equalizer.setBandLevel(band, (short)level);
             }
-
-            Log.d(TAG, "Equalizer applied successfully in service");
 
         } catch (Exception e) {
             Log.e(TAG, "Error applying equalizer: " + e.getMessage());
@@ -150,17 +135,6 @@ public class EqualizerService extends Service {
         // Lưu tên các preset hệ thống với key khác
         for (short i = 0; i < numberOfSystemPresets; i++) {
             prefs.edit().putString("systemPreset" + i, equalizer.getPresetName(i)).commit();
-        }
-
-        // Log để debug
-        for (short i = 0; i < numberOfSystemPresets; i++) {
-            Log.d("systemPreset", "systemPreset" + i + "=" + prefs.getString("systemPreset" + i, ""));
-        }
-
-        // Log user presets
-        int numberOfUserPresets = prefs.getInt("numberOfUserPresets", 0);
-        for (int i = 0; i < numberOfUserPresets; i++) {
-            Log.d("userPreset", "userPreset" + i + "=" + prefs.getString("userPreset" + i, ""));
         }
     }
 
